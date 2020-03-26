@@ -31,11 +31,8 @@ class Game {
     });
     if (this.players.length < 5) {
     }
-    this.middleCards = [
-      new MiddleCard("cerceuil gris"),
-      new MiddleCard("cerceuil noir"),
-      new MiddleCard("cerceuil marron"),
-    ];
+    MiddleCard.shuffleNames();
+    this.middleCards = [new MiddleCard(), new MiddleCard(), new MiddleCard()];
 
     this.citizens.push(...this.players, ...this.middleCards);
 
@@ -78,17 +75,14 @@ class Game {
 
   getLoups(askingPlayer) {
     return this.players.filter(
-      (player) =>
-        player.role.team === "loup" &&
-        player.member.id !== askingPlayer.member.id
+      (player) => player.role.team === "loup" && player.id !== askingplayer.id
     );
   }
 
   getFrancMacon(askingPlayer) {
     return this.players.find(
       (player) =>
-        player.role instanceof FrancMacon &&
-        player.member.id !== askingPlayer.member.id
+        player.role instanceof FrancMacon && player.id !== askingplayer.id
     );
   }
 
@@ -109,7 +103,7 @@ class Game {
   }
 
   getPlayerById(id) {
-    return this.players.find((player) => player.member.id === id);
+    return this.players.find((player) => player.id === id);
   }
 
   execution(votes) {
@@ -117,14 +111,14 @@ class Game {
     let currentHighest = 0;
     let deadPlayersId = [];
     votes.forEach((player) => {
-      const previousScore = deathMap.get(player.member.id) || 0;
+      const previousScore = deathMap.get(player.id) || 0;
       const newScore = previousScore + 1;
-      deathMap.set(player.member.id, newScore);
+      deathMap.set(player.id, newScore);
       if (newScore === currentHighest) {
-        deadPlayersId.push(player.member.id);
+        deadPlayersId.push(player.id);
       }
       if (newScore > currentHighest) {
-        deadPlayersId = [player.member.id];
+        deadPlayersId = [player.id];
         currentHighest = newScore;
       }
     });

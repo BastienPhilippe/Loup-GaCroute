@@ -42,7 +42,7 @@ class Role {
         return Math.floor(Math.random() * (max - min) + min) * 1000;
       }
       if (this.requireAction) {
-        await new Promise((resolve) => setTimeout(resolve, randomWait(8, 27)));
+        await new Promise((resolve) => setTimeout(resolve, randomWait(1, 2)));
       }
     } else {
       await player.sendDM("Vous vous reveillez");

@@ -15,8 +15,8 @@ const roles = {
   1: [LoupGarou],
   2: [LoupGarou, Voyante],
   3: [LoupGarou, Voyante, ChasseurDeFantomes],
-  4: [LoupGarou, Voyante, ChasseurDeFantomes, Divinateur],
-  5: [LoupGarou, Voyante, Voleur, Insomniaque, LoupShaman],
+  4: [LoupGarou, Voyante, Voyante, Voyante],
+  5: [Gremlin, Gremlin, Gremlin, Gremlin, Gremlin],
   6: [LoupGarou, Voyante, ChasseurDeFantomes, Divinateur, LoupShaman, Espion],
   7: [LoupGarou, Voyante, Voleur, Divinateur, LoupShaman, Espion, Gremlin],
   8: [

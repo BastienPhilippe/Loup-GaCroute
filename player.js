@@ -3,12 +3,12 @@ const Citizen = require("./citizen");
 class Player extends Citizen {
   constructor(member) {
     super();
+    this.id = member.user.id;
     this.member = member;
     this.dmChannel = member.createDM();
     this.role = undefined;
     this.nightOrder = 0;
     this.initialRole = undefined;
-    this.middleCard = !member;
   }
 
   getName() {
@@ -35,66 +35,71 @@ class Player extends Citizen {
     return answer.first().content;
   }
 
-  async pickPlayer(playerList, canBeNone = true) {
+  async pickSomething(things) {
     const help = "*Entrez le nombre correspondant a votre choix*";
-    function assertPlayerId(id, player) {
-      if (canBeNone && id === -1) {
-        return true;
-      }
+
+    function assertAnswerIsCorrect(id, player) {
       if (!Number.isInteger(id)) {
         player.sendDM("veuillez entrer un nombre");
         return false;
       }
-      if (!playerList[id]) {
+      if (!things[id]) {
         player.sendDM("ce nombre est chelou, verifie mec");
         return false;
       }
-      if (
-        playerList[id].member &&
-        playerList[id].member.id === player.member.id
-      ) {
-        player.sendDM("vous ne pouvez pas vous choisir vous même");
-        return false;
-      }
       return true;
     }
-    const players = playerList.map((player, id) => {
-      id++;
-      return `**${id}** => ${player.getName()}`;
-    });
-    if (canBeNone) {
-      players.unshift("**0** => Pour ne choisir personne");
-    }
-    const prompt = players.join("\n");
-    let userId;
+    const prompt = things
+      .map((thing, id) => `**${id}** => ${thing.prompt}`)
+      .join("\n");
+    let answerId;
     do {
-      console.log(prompt);
       this.sendDM(prompt);
       this.sendDM(help);
-      userId = await this.awaitDManswer();
-      userId--;
-    } while (!assertPlayerId(userId, this));
-    if (userId === -1) {
-      this.sendDM(`Vous n'avez choisis personne`);
-      return undefined;
-    }
-    this.sendDM(`Vous avez choisi ${playerList[userId].getName()}`);
-    return playerList[userId];
+      answerId = parseInt(await this.awaitDManswer());
+    } while (!assertAnswerIsCorrect(answerId, this));
+    this.sendDM(things[answerId].dm);
+    return things[answerId].value;
   }
 
-  async pickAnotherPlayer(playerList, firstPlayer) {
-    function assertNoTheSamePlayer(picker, pickedPlayer) {
-      if (pickedPlayer.member.id === firstPlayer.member.id) {
-        picker.sendDM("Vous ne pouvez pas choisir deux fois le même joueur");
-        return false;
-      }
-      return true;
+  async pickPlayer(
+    playerList,
+    canBeNone = true,
+    msg = "Choisissez une personne"
+  ) {
+    const playerListToPick = playerList
+      .filter((player) => player.id !== this.id)
+      .map((player) => ({
+        prompt: player.getName(),
+        value: player,
+        dm: `Vous avez choisi ${player.getName()}`,
+      }));
+
+    if (canBeNone) {
+      playerListToPick.unshift({
+        prompt: "Pour ne choisir personne",
+        value: null,
+        dm: "Vous n'avez choisis personne",
+      });
     }
-    let pickedPlayer;
-    do {
-      pickedPlayer = await this.pickPlayer(playerList, false);
-    } while (!assertNoTheSamePlayer(this, pickedPlayer));
-    return pickedPlayer;
+    this.sendDM(msg);
+    return await this.pickSomething(playerListToPick);
+  }
+
+  async pickTwoPlayers(playerList, canBeNone = true) {
+    const firstPlayer = await this.pickPlayer(playerList, canBeNone);
+    if (firstPlayer) {
+      const listShortened = playerList.filter(
+        (player) => player.id !== firstPlayer.id
+      );
+      const secondPlayer = await this.pickPlayer(
+        listShortened,
+        false,
+        "Choisissez une autre personne"
+      );
+      return [firstPlayer, secondPlayer];
+    }
+    return null;
   }
 
   sendIntro() {

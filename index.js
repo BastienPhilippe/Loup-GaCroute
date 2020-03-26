@@ -1,9 +1,11 @@
 const Discord = require("discord.js");
 const fs = require("fs");
+const _ = require("lodash");
 
 const bot = new Discord.Client();
 
 const Game = require("./game");
+const help = require("./help");
 
 const VOICE_CHANNEL_ID = "690316072808874171";
 const GUILD_ID = "690316072808874167";
@@ -17,6 +19,9 @@ bot.on("ready", () => {
   console.log("ready");
 });
 bot.on("message", (message) => {
+  if (_.startsWith(message.content, "!help")) {
+    help(message.content, message.channel);
+  }
   if (message.channel.id === VILLAGE_ID && message.content === "!start") {
     new Game(message.guild, message.channel);
   }
